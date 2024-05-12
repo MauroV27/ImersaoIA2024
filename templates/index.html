@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página inicial</title>
+    <style>
+        html, body{
+            background-color: #007bff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main{
+            text-align: center;
+        }
+
+        #contentReferece{
+            text-align: center;
+            width: 25%;
+            font-size: 14pt;
+            margin: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            width: 50%;
+            margin: auto;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 50px;
+            appearance: none; /* Ocultar radio buttons padrão */
+            width: 0; /* Remover largura */
+            height: 0; /* Remover altura */
+            margin: 0; /* Remover margem */
+            padding: 0; /* Remover preenchimento */
+            border: none; /* Remover borda */
+        }
+
+        .radio-container {
+            cursor: pointer; /* Indicar que é clicável */
+            width: 100%;
+            border: 1px solid white; /* Borda azul */
+            background-color: #007bff;
+        }
+
+        .radio-label {
+            cursor: pointer;
+            display: flex; /* Ocupar todo o espaço do container */
+            width: 100%; /* Largura total */
+            justify-content: center;
+            vertical-align: middle;
+            text-align: center; /* Alinhar texto no centro */
+            color: white; /* Cor do texto branco */
+            font-weight: bold;
+            font-size: 16   pt; /* Tamanho da fonte */
+            margin: 0; /* Remover margem */
+            padding: 0; /* Remover preenchimento */
+            margin-top: -20px;
+        }
+
+        /* .radio-container:checked{
+            background-color: white;
+            color: #007bff;
+        } */
+    
+        .radio-container input[type="radio"]:checked + .radio-label {
+            background-color: white; /* Cor de fundo branco quando selecionado */
+            color: #007bff; /* Cor do texto azul quando selecionado */
+        }
+
+        .radio-container + .radio-label {
+           margin-left: 5px; /* Espaço entre container e label */
+        }
+
+        .list-element {
+            padding: 0;
+            margin-top: 16px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16pt;
+        }
+
+        .list-element > p {
+            margin: 0;
+        }
+
+        #btn-call-server {
+            text-align: center;
+            width: 20%;
+            font-size: 14pt;
+            margin: 16px;
+        }
+
+        footer {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 24px;
+            text-align: center;
+            /* Estilos opcionais */
+            background-color: #f2f2f2;
+            color: #333;
+            padding: 8px 0;
+        }
+
+        footer > p {
+            /* margin-bottom: -12px; */
+            line-height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h1 style="color: white;">Recomenda AI</h1>
+ 
+        <input type="text" placeholder="Quero algo como..." id="contentReferece"/>
+
+        <div class="radio-group">
+            <div class="radio-container">
+                <input type="radio" id="opcao1" name="mediaType" value="Filme" checked>
+                <label class="radio-label" for="opcao1">Filme</label>
+            </div>
+
+            <div class="radio-container">
+                <input type="radio" id="opcao2" name="mediaType" value="Série">
+                <label class="radio-label" for="opcao2">Série</label>
+            </div>
+
+            <div class="radio-container">
+                <input type="radio" id="opcao3" name="mediaType" value="Livro">
+                <label class="radio-label" for="opcao3">Livro</label>
+            </div>
+
+            <div class="radio-container">
+                <input type="radio" id="opcao4" name="mediaType" value="Manga">
+                <label class="radio-label" for="opcao4">Manga</label>
+            </div>
+
+            <div class="radio-container">
+                <input type="radio" id="opcao5" name="mediaType" value="Video game">
+                <label class="radio-label" for="opcao5">Video game</label>        
+            </div>
+          </div>
+
+        <button id="btn-call-server" onclick="callServer()">Recomende algo</button>
+
+        <div id="respostaServidor"></div>
+    </div>
+
+    <footer>
+        <p>Desenvolvido por <a href="https://github.com/MauroV27">Mauro Victor</a></p>
+    </footer>
+
+    <script>
+        function callServer() {
+            const nomeInput = "Mauro";//document.getElementById('nomeInput');
+            const emailInput = "t@teste.com";//document.getElementById('emailInput');
+            const respostaServidor = document.getElementById('respostaServidor');
+
+            const reference = document.querySelector("#contentReferece");
+
+            if ( reference.value == "" || reference.value == null ){
+                alert("Precisa inserir alguma referência para o modelo")
+                return;
+            }
+
+
+            const radios = document.querySelectorAll('input[name="nomeDoGrupo"]'); // Seleciona todos os radio buttons do grupo
+            
+            let mediaType = "Filme";
+
+            for (const radio of radios) {
+                if (radio.checked) {
+                    mediaType = radio.value; // Retorna o valor do radio button selecionado
+                }
+            }
+  
+
+            const dados = {
+                media: mediaType,
+                ref: reference.value
+            };
+
+            fetch('/enviarDados', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                const resp = data.mensagem
+                console.log("RESPOSTA : ", resp)
+
+                // respostaServidor.innerHTML = JSON.stringify(resp)
+                const interface = criarInterface(data.mensagem);
+                respostaServidor.innerHTML = interface;
+            })
+            .catch(error => respostaServidor.innerHTML = 'Erro: ' + error.message);
+        }
+
+        // function imprimirTabela(tabela) {
+        //     const linhas = tabela.querySelectorAll('tr');
+        //     for (const linha of linhas) {
+        //         const celulas = linha.querySelectorAll('td');
+        //         const dadosLinha = [];
+        //         for (const celula of celulas) {
+        //             dadosLinha.push(celula.textContent);
+        //         }
+        //         console.log(dadosLinha); // Imprime cada linha como um array de valores
+        //     }
+        // }
+
+        function criarInterface(listaObjetos) {
+
+                let tabela = "";
+
+                const cap = (word) => {
+                    return word[0].toUpperCase() + word.slice(1);
+                }
+
+                for ( const obj of listaObjetos ){
+                    tabela += "<li class='list-element'>";
+
+                    const listKeys = Object.keys(obj).sort().reverse();
+
+                    for ( const v of listKeys ){
+                        tabela += `<p><b>${cap(v)}</b> : ${cap(obj[v])}</p>`
+                        // tabela += `${obj[v]} `
+                    }
+
+                    tabela += '</li>'
+                }
+
+                // Criar elementos HTML
+                // const tabela = document.createElement('table');
+                // const thead = document.createElement('thead');
+                // const tbody = document.createElement('tbody');
+
+                // // Criar cabeçalho da tabela
+                // const cabecalho = thead.insertRow();
+                // chaves.forEach(chave => {
+                //     const celulaCabecalho = cabecalho.insertCell();
+                //     celulaCabecalho.textContent = chave;
+                // });
+
+                // // Criar linhas de dados
+                // listaObjetos.forEach(objeto => {
+                //     const linha = tbody.insertRow();
+                //     chaves.forEach(chave => {
+                //         const valor = objeto[chave];
+                //         const celulaDado = linha.insertCell();
+                //         celulaDado.textContent = valor;
+                //     });
+                // });
+
+                // Adicionar cabeçalho e corpo à tabela
+                // tabela.appendChild(thead);
+                // tabela.appendChild(tbody);
+
+                // Retornar a tabela como elemento HTML
+                return tabela;
+            }
+
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     // const btnEnviar = document.getElementById('btnEnviar');
+        //     const nomeInput = "Mauro";//document.getElementById('nomeInput');
+        //     const emailInput = "t@teste.com";//document.getElementById('emailInput');
+        //     const respostaServidor = document.getElementById('respostaServidor');
+
+        //     btnEnviar.addEventListener('click', function() {
+        //         const dados = {
+        //             nome: nomeInput.value,
+        //             email: emailInput.value
+        //         };
+
+        //         fetch('/enviarDados', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify(dados)
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => respostaServidor.innerHTML = data.mensagem)
+        //         .catch(error => respostaServidor.innerHTML = 'Erro: ' + error.message);
+        //     });
+        // });
+
+
+
+    </script>
+
+
+</body>
+</html>
